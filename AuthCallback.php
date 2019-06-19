@@ -29,7 +29,7 @@ class AuthCallback
 
         $response = file_get_contents($url, false, $context);
 
-        if ($response = false) { //ERROR
+        if ($response == false) { //ERROR
             echo "Eve SSO failed to respond, ESI might be down?";
             return;
         }
