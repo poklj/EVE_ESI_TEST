@@ -5,37 +5,44 @@ class AuthCallback
     /**
      * Callback function for ESI Authenticating
      */
+
+    private $secretkeyloc = "res/SecretKey.txt";
+    private $esi_idloc = "res/esi_id.txt";
     function Callback(){
-        $f = fopen("../res/SecretKey.txt", "r");
-        $secretkey = fread($f, filesize("../res/SecretKey.txt"));
+        $f = fopen($this->secretkeyloc, "r");
+        $secretkey = fread($f, filesize($this->secretkeyloc));
         fclose($f);
 
-        $f = fopen("../res/esi_id.txt", "r");
-        $esi_id = fread($f, filesize("../res/esi_id.txt"));
-        close($f);
+        $f = fopen($this->esi_idloc, "r");
+        $esi_id = fread($f, filesize($this->esi_idloc));
+        fclose($f);
 
         $url = "https://login.eveonline.com/v2/oauth/token";
-        $data = array('grant_type' => "authorization_code", "code" => $_GET["code"]);
-        $options = array(
-          'http' => array(
-              "method" => "POST",
-              "Authorization" => "Basic" . base64_encode($esi_id . + ":" . $secretkey),
-              "Content-Type" => "application/x-www-form-urlencoded",
-              "Host" => "login.eveonline.com",
-              $data
-          )
+
+        $str = $esi_id . ":" . $secretkey;
+
+        $content = array(
+            "grant_type" => "authorization_code",
+            "code" => $_GET["code"]
         );
-        $context = stream_context_create($options);
 
-        $response = file_get_contents($url, false, $context);
+        $header = array(
+            "Authorization:Basic " . base64_encode($str),
+            "Content-Type:application/x-www-form-urlencoded",
+            "Host:login.eveonline.com"
+        );
+        $post = curl_init();
 
-        if ($response == false) { //ERROR
-            echo "Eve SSO failed to respond, ESI might be down?";
-            return;
-        }
-        var_dump($response);
-        return;
+        curl_setopt($post, CURLOPT_URL, $url);
+        curl_setopt($post, CURLOPT_POST, true);
+        curl_setopt($post, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($post, CURLOPT_POSTFIELDS, http_build_query($content));
+        curl_setopt($post, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($post);
+        $info = curl_getinfo($post);
 
+        curl_close($post);
+        var_dump($result);
     }
 }
 
