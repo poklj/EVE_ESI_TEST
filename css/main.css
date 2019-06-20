@@ -1,0 +1,9 @@
+body {
+    background-color: lightgray;
+}
+
+#Login {
+    border-style: solid;
+    border-color: darkgray;
+    background-color: darkgray;
+}
